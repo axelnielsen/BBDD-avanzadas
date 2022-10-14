@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:14.1-alpine
+    container_name: postgres
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    env_file:
+      - .env
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./files:/files
+      - ./spaces:/spaces
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+    restart: unless-stopped
+
+  mssql:
+    image: mcr.microsoft.com/azure-sql-edge
+    container_name: mssql
+    env_file:
+      - .env
+    volumes:
+      - ./data/mssql:/var/lib/mssqlql/data
+      - ./files:/files
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${MSSQL_PASSWORD}
+    ports:
+      - ${MSSQL_PORT}:${MSSQL_PORT}
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    env_file:
+      - .env
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./data/mongo:/data/db
+      - ./files:/files
+    ports:
+      - ${MONGODB_PORT}:${MONGODB_PORT}
+    restart: unless-stopped
+
+  cassandra:
+    image: cassandra:4
+    container_name: cassandra
+    env_file:
+      - .env
+    ports:
+      - ${CASSANDRA_PORT}:${CASSANDRA_PORT}
+    environment:
+      - "MAX_HEAP_SIZE=256M"
+      - "HEAP_NEWSIZE=128M"
+    restart: unless-stopped
+    volumes:
+      - ./data/cassandra:/var/lib/cassandra
+      - ./files:/files

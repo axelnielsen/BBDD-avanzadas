@@ -1,0 +1,51 @@
+use('covid');
+
+//////////Buscar el polígono al que pertenece cada coordenada en cases//////////
+/////////El resultado es posible guardarlo en una variable, sin embargo, en esta iteración de ensayo y error se optó por crear un collection con el resultado y posteriormente trabajar sobre él
+
+db.cases.find().forEach(
+    function(register){
+      var stateName=  db.states.find({
+          geometry: {
+          $geoIntersects: {
+              $geometry: {
+                "type": "Point",
+                "coordinates": [register.longitudes, register.latitudes]
+              }
+            } 
+          }
+        }, {
+       name:true
+        });
+      stateName.forEach(
+        function (printedName){
+          db.statesCases.insert({
+                            Stane: printedName.name,
+                            Cases: register.Total
+                            
+                             })
+        }
+
+      );
+    }
+);
+///////////////////Sumar agrupando por nombre de estado//////////
+db.statesCases.aggregate(
+   [
+     {
+       $group:
+          {
+            _id: "$Stane",
+            sum: { $sum: "$Cases" }
+          }
+     },{
+          $sort: {
+            sum: -1
+          }
+
+     },{
+          $limit: 5
+     }
+   ]
+);
+

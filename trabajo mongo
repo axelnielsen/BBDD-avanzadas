@@ -1,0 +1,15 @@
+use('lab');
+
+db.states.find({ 
+geometry: { 
+    $geoIntersects: {
+        $geometry: {
+            type: "MultiPoint", coordinates: 
+            [[-73.9856429440813, 40.7486111667096]] 
+        } 
+    } 
+} 
+}, {
+	// Sólo seleccionaremos el campo name que contiene el nombre del estado.
+  name: true
+})
